@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1082201202936",
+    "project_id": "ians-boomerang",
+    "storage_bucket": "ians-boomerang.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1082201202936:android:784c5da0984a6f5969db0d",
+        "android_client_info": {
+          "package_name": "com.example.boomerang_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1082201202936-1sf5gdtodn4kj7om10407hbhngm7ktts.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj4x8ebO328m_TOOyKHv2J1Cqf4f0MbxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1082201202936-1sf5gdtodn4kj7om10407hbhngm7ktts.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

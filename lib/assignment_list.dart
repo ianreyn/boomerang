@@ -1,11 +1,14 @@
 import 'dart:collection';
+import 'dart:math';
 //Sources: https://pub.dev/packages/table_calendar
 //https://github.com/aleksanderwozniak/table_calendar/blob/master/example/lib/pages/events_example.dart
 
+import 'package:boomerang_app/SwipeBox.dart';
 import 'package:boomerang_app/assignment.dart';
 import 'package:boomerang_app/models/assignment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class AssignmentList extends StatefulWidget {
@@ -20,7 +23,9 @@ class AssignmentList extends StatefulWidget {
 class _AssignmentListState extends State<AssignmentList> {
 
   final _model = AssignmentModel();
+  late Map<DateTime, List<Assignment>> _events = {};
   List<Assignment> assignments = [];
+  List<Assignment> assignmentsToday = [];
   var _lastInsertedID = 0;
   //String selectedType = "all";
   DateTime _firstDay = DateTime.utc(2010);
@@ -57,7 +62,8 @@ class _AssignmentListState extends State<AssignmentList> {
               )
           ),
         ),
-        TableCalendar(
+        TableCalendar<Assignment>(
+          eventLoader: getEventsOfDay,
             focusedDay: _focusedDay,
             firstDay: _firstDay,
             lastDay: _lastDay,
@@ -83,11 +89,35 @@ class _AssignmentListState extends State<AssignmentList> {
                setState(() {
                  _selectedDay = selectedDay;
                  _focusedDay = focusedDay;
+                 assignmentsToday = getEventsOfDay(_selectedDay!);
                });
               }
             }),
+        Container(
+          height: 200,
+          child: ListView(
+            children:
+              assignmentsToday.map((assignment) => SwipeBox(
+                    assignment: assignment,
+                    model: _model,
+                getAllAssignments: getAssignments,
+                  )
+              ).toList(),
+          ),
+        )
       ],
     );
+  }
+  List<Assignment> getEventsOfDay(DateTime day)
+  {
+    DateTime adjustedDay = DateTime(day.year, day.month, day.day);
+    if (_events[adjustedDay] == null)
+      {
+        //print("Events for $adjustedDay are null");
+        return [];
+      }
+    //print(_events[adjustedDay]);
+    return _events[adjustedDay]!;
   }
 
   //List<Assignment>getEventsForDay(day)
@@ -107,9 +137,36 @@ class _AssignmentListState extends State<AssignmentList> {
 
   Future getAssignments() async
   {
+    //_events.clear(); //clear all assignments
     List<Assignment> myAssignments = await _model.getAllAssignments();
+    assignments = myAssignments;
+    Map<DateTime, List<Assignment>> newAssignments = assignments.fold({}, (Map<DateTime, List<Assignment>> map, Assignment assignment) {
+      DateTime dueDate = DateTime(assignment.dueDate!.year, assignment.dueDate!.month, assignment.dueDate!.day);
+      // if the map already contains a list of assignments for the due date, add the new assignment to it
+      if (map.containsKey(dueDate)) {
+        map[dueDate]?.add(assignment);
+      }
+      // otherwise, create a new list with the assignment and add it to the map
+      else {
+        map[dueDate] = [assignment];
+      }
+
+      return map;
+    });
+
+    int? maxID = 0;
+    for (int i = 0; i < assignments.length; i++)
+    {
+      if (assignments[i].id! > maxID!)
+      {
+        maxID = assignments[i].id;
+      }
+    }
+    _lastInsertedID = maxID! + 1;
+    print(_lastInsertedID);
+
     setState(() {
-      assignments = myAssignments;
+      _events = newAssignments;
     });
     print(assignments);
   }
@@ -117,16 +174,7 @@ class _AssignmentListState extends State<AssignmentList> {
   void initState()
   {
     getAssignments(); //get assignments
-    int? maxID = 0;
-    for (int i = 0; i < assignments.length; i++)
-      {
-        if (assignments[i].id! > maxID!)
-          {
-            maxID = assignments[i].id;
-          }
-      }
-    _lastInsertedID = maxID! + 1;
-    print(_lastInsertedID);
+
     super.initState();
   }
 

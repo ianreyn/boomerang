@@ -38,6 +38,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
               ),
               TextField(
                 controller: dueController,
+                decoration: InputDecoration(
+                  labelText: "Due Date"
+                ),
                 focusNode: AlwaysDisabledFocusNode(),
                 onTap: () {
                   selectDate(context, dueController);
@@ -45,6 +48,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
               ),
               TextField(
                 controller: doController,
+                decoration: InputDecoration(
+                  labelText: "Do on this date"
+                ),
                 focusNode: AlwaysDisabledFocusNode(),
                 onTap: () {
                   selectDate(context, doController);
@@ -53,7 +59,7 @@ class _AssignmentFormState extends State<AssignmentForm> {
               IconButton(
                   onPressed: () {
                     //Assignment newAssignment = Assignment(title: titleController.text, dueDate: DateTime.parse(dueController.text), doTime: DateTime.parse(doController.text), account: "default");
-                    Navigator.pop(context, "${titleController.text},${dueController.text},${dueController.text}");
+                    Navigator.pop(context, "${titleController.text},${dueController.text},${doController.text}");
                   },
                   icon: Icon(Icons.save))
             ],

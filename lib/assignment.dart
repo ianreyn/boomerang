@@ -23,8 +23,8 @@ class Assignment {
   {
     return {
       'title': this.title!,
-      'dueTime': DateFormat('yyyy-MM-dd').format(this.dueDate!),
-      'doTime': DateFormat('yyyy-MM-dd').format(this.doTime!),
+      'dueTime': Timestamp.fromDate(dueDate!),
+      'doTime': Timestamp.fromDate(doTime!),
       'length': this.length!,
       'classId': this.classId
     };

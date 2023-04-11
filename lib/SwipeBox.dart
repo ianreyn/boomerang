@@ -1,12 +1,14 @@
 import 'package:boomerang_app/assignment.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class SwipeBox extends StatefulWidget {
-  const SwipeBox({Key? key, this.assignment, this.getAllAssignments}) : super(key: key);
+  const SwipeBox({Key? key, this.assignment, this.getAllAssignments, this.query}) : super(key: key);
 
   final Assignment? assignment;
   final AssignmentCallback? getAllAssignments;
+  final QuerySnapshot? query;
 
   @override
   State<SwipeBox> createState() => _SwipeBoxState();
@@ -67,11 +69,13 @@ class _SwipeBoxState extends State<SwipeBox> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               IconButton(
-                                  onPressed: () => {},
+                                  onPressed: deleteItem,
                                   icon: const Icon(Icons.check_box_outlined)
                               ),
                               IconButton(
-                                  onPressed: () => {},
+                                  onPressed: () async {
+                                    await updateItem(context);
+                                  },
                                   icon: const Icon(Icons.more_vert))
                             ],
                           ),
@@ -91,8 +95,7 @@ class _SwipeBoxState extends State<SwipeBox> {
     });
   }
 
-  /*
-   deleteItem(AssignmentModel model, int id) async
+   deleteItem() async
    {
     bool delete = await showDialog(
         context: context,
@@ -115,29 +118,40 @@ class _SwipeBoxState extends State<SwipeBox> {
     );
     if (delete)
       {
+        DocumentSnapshot studentDoc = widget.query!.docs[0];
+        QuerySnapshot assignmentSnapshot = await studentDoc.reference.collection('assignments')
+            .where('title', isEqualTo: widget.assignment!.title).where('classId', isEqualTo: widget.assignment!.classId).get();
+        String assignmentToBeDeleted = assignmentSnapshot.docs[0].id;
+        DocumentReference assignmentReference = studentDoc.reference.collection('assignments').doc(assignmentToBeDeleted);
+        await assignmentReference.delete();
         setState(() {
-          model.deleteAssnById(id);
           widget.getAllAssignments!();
         });
       }
   }
 
-   */
 
-  /*
-  updateItem(BuildContext context, AssignmentModel model, int id) async
+  Future updateItem(BuildContext context) async
   {
     final newAssignment = await Navigator.pushNamed(context, '/addAssn');
     String data = newAssignment.toString();
     List subData = data.split(",");
-    Assignment assignment = Assignment(title: subData[0], dueDate: DateTime.parse(subData[1]), doTime: DateTime.parse(subData[2]), account: "default");
-    assignment.id = id;
-    setState(() async {
-      int updatedID = await model.updateAssn(assignment);
+    Assignment assignment = Assignment(title: subData[0], dueDate: DateTime.parse(subData[1]), doTime: DateTime.parse(subData[2]), length: double.parse(subData[3]), classId: subData[4]);
+    Map<String, dynamic> assignmentData = assignment.toMap();
+
+    DocumentSnapshot studentDoc = widget.query!.docs[0];
+    QuerySnapshot assignmentSnapshot = await studentDoc.reference.collection('assignments')
+        .where('title', isEqualTo: widget.assignment!.title).where('classId', isEqualTo: widget.assignment!.classId).get();
+    String assignmentToBeUpdated = assignmentSnapshot.docs[0].id;
+    CollectionReference assignmentCollection = studentDoc.reference.collection('assignments');
+    DocumentReference assignmentDoc = assignmentCollection.doc(assignmentToBeUpdated);
+
+    setState(() {
+      //int updatedID = await model.updateAssn(assignment);
+      assignmentDoc.update(assignmentData);
       widget.getAllAssignments!();
     });
   }
-  */
 }
 
 typedef AssignmentCallback = void Function();

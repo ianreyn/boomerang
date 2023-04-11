@@ -17,6 +17,9 @@ class _AssignmentFormState extends State<AssignmentForm> {
   TextEditingController titleController = TextEditingController();
   TextEditingController dueController = TextEditingController();
   TextEditingController doController = TextEditingController();
+  TextEditingController lengthController = TextEditingController();
+  TextEditingController classController = TextEditingController();
+  TextEditingController numSessionsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,10 +59,28 @@ class _AssignmentFormState extends State<AssignmentForm> {
                   selectDate(context, doController);
                 },
               ),
+              TextField(
+                controller: lengthController,
+                decoration: InputDecoration(
+                    labelText: "How many hours do you think you'll take?"
+                ),
+              ),
+              TextField(
+                controller: classController,
+                decoration: InputDecoration(
+                    labelText: "Enter the class code for this assignment"
+                ),
+              ),
+              TextField(
+                controller: numSessionsController,
+                decoration: InputDecoration(
+                    labelText: "Split the work on how many sessions?"
+                ),
+              ),
               IconButton(
                   onPressed: () {
                     //Assignment newAssignment = Assignment(title: titleController.text, dueDate: DateTime.parse(dueController.text), doTime: DateTime.parse(doController.text), account: "default");
-                    Navigator.pop(context, "${titleController.text},${dueController.text},${doController.text}");
+                    Navigator.pop(context, "${titleController.text},${dueController.text},${doController.text},${lengthController.text},${classController.text}");
                   },
                   icon: Icon(Icons.save))
             ],

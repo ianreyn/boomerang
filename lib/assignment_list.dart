@@ -53,7 +53,7 @@ class _AssignmentListState extends State<AssignmentList> {
           width: 100.0,
           height: 40.0,
           child: ElevatedButton(
-              onPressed: () {},
+              onPressed: addAssignment,
               child: Row(
                 children: [
                   Text("Add"),
@@ -99,7 +99,7 @@ class _AssignmentListState extends State<AssignmentList> {
             children:
               assignmentsToday.map((assignment) => SwipeBox(
                     assignment: assignment,
-                getAllAssignments: getAssignments,
+                getAllAssignments: getAssignments, query: routeInfo['query'],
                   )
               ).toList(),
           ),
@@ -121,20 +121,21 @@ class _AssignmentListState extends State<AssignmentList> {
 
   //List<Assignment>getEventsForDay(day)
 
-  /*
+
   Future addAssignment() async
   {
     final newAssignment = await Navigator.pushNamed(context, '/addAssn');
     String data = newAssignment.toString();
     List subData = data.split(",");
-    Assignment assignment = Assignment(title: subData[0], dueDate: DateTime.parse(subData[1]), doTime: DateTime.parse(subData[2]), account: "default");
-    assignment.id = _lastInsertedID;
-    _lastInsertedID = await _model.insertAssn(assignment) + 1;
-    print("New ID to insert at: $_lastInsertedID");
+    Assignment assignment = Assignment(title: subData[0], dueDate: DateTime.parse(subData[1]), doTime: DateTime.parse(subData[2]), length: double.parse(subData[3]), classId: subData[4]);
+    print(assignment);
+    QuerySnapshot query = routeInfo['query'];
+    DocumentSnapshot studentDoc = query.docs[0];
+    Map<String, dynamic> assignmentData = assignment.toMap();
+    await studentDoc.reference.collection('assignments').add(assignmentData);
     getAssignments();
 
   }
-  */
 
   Future getAssignments() async
   {

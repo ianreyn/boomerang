@@ -2,38 +2,38 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class Assignment {
-  int? id;
   String? title;
   DateTime? dueDate;
   DateTime? doTime;
-  String? account;
+  double? length;
+  String? classId;
   //DocumentReference? refid;
-  Assignment({this.title, this.dueDate, this.doTime, this.account});
+  Assignment({this.title, this.dueDate, this.doTime, this.length, this.classId});
 
   Assignment.fromMap(Map map)
   {
-    id = map['id'];
     title = map['title'];
-    dueDate = DateTime.parse(map['date']);
-    doTime = DateTime.parse(map['plan']);
-    account = map['account'];
+    dueDate = map['dueTime'].toDate();
+    doTime = map['doTime'].toDate();
+    length = map['length'].toDouble();
+    classId = map['classId'];
   }
 
   Map<String, Object?> toMap()
   {
     return {
-      'id': this.id!,
       'title': this.title!,
-      'date': DateFormat('yyyy-MM-dd').format(this.dueDate!),
-      'plan': DateFormat('yyyy-MM-dd').format(this.doTime!),
-      'account': this.account!
+      'dueTime': DateFormat('yyyy-MM-dd').format(this.dueDate!),
+      'doTime': DateFormat('yyyy-MM-dd').format(this.doTime!),
+      'length': this.length!,
+      'classId': this.classId
     };
   }
 
   @override
   String toString() {
     // TODO: implement toString
-    return "ID: $id, Title: $title, Due date: $dueDate";
+    return "Title: $title, Due date: $dueDate, Class: $classId";
   }
 
 }

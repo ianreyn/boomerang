@@ -109,8 +109,14 @@ class _LoginPageState extends State<LoginPage> {
   }
   Future<void> goToCalendar(username, password) async
   { //TODO: Check if username and password are correct
-    var loginStatus = await Navigator.pushNamed(context, r'/calendar',
-        arguments: {'userName': username});
+    CollectionReference studentReference = FirebaseFirestore.instance.collection('students');
+    QuerySnapshot query = await studentReference.where('username', isEqualTo: username).where('password', isEqualTo: password).get();
+    if (query.size > 0)
+      {
+        var loginStatus = await Navigator.pushNamed(context, r'/calendar',
+            arguments: {'query': query});
+      }
+
   }
 }
 

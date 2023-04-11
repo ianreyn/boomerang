@@ -5,7 +5,6 @@ import 'dart:math';
 
 import 'package:boomerang_app/SwipeBox.dart';
 import 'package:boomerang_app/assignment.dart';
-import 'package:boomerang_app/models/assignment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +21,7 @@ class AssignmentList extends StatefulWidget {
 
 class _AssignmentListState extends State<AssignmentList> {
 
-  final _model = AssignmentModel();
+  late Map<String, dynamic> routeInfo;
   late Map<DateTime, List<Assignment>> _events = {};
   List<Assignment> assignments = [];
   List<Assignment> assignmentsToday = [];
@@ -36,6 +35,7 @@ class _AssignmentListState extends State<AssignmentList> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title!),
@@ -53,7 +53,7 @@ class _AssignmentListState extends State<AssignmentList> {
           width: 100.0,
           height: 40.0,
           child: ElevatedButton(
-              onPressed: addAssignment,
+              onPressed: () {},
               child: Row(
                 children: [
                   Text("Add"),
@@ -99,7 +99,6 @@ class _AssignmentListState extends State<AssignmentList> {
             children:
               assignmentsToday.map((assignment) => SwipeBox(
                     assignment: assignment,
-                    model: _model,
                 getAllAssignments: getAssignments,
                   )
               ).toList(),
@@ -122,6 +121,7 @@ class _AssignmentListState extends State<AssignmentList> {
 
   //List<Assignment>getEventsForDay(day)
 
+  /*
   Future addAssignment() async
   {
     final newAssignment = await Navigator.pushNamed(context, '/addAssn');
@@ -134,12 +134,17 @@ class _AssignmentListState extends State<AssignmentList> {
     getAssignments();
 
   }
+  */
 
   Future getAssignments() async
   {
     //_events.clear(); //clear all assignments
-    List<Assignment> myAssignments = await _model.getAllAssignments();
-    assignments = myAssignments;
+    QuerySnapshot query = routeInfo['query'];
+    DocumentSnapshot studentDoc = query.docs[0];
+    CollectionReference assignmentsRef = studentDoc.reference.collection('assignments');
+    QuerySnapshot assignmentsQuery = await assignmentsRef.get();
+    List<Assignment> assignmentsList = assignmentsQuery.docs.map((doc) => Assignment.fromMap(doc.data() as Map<String, dynamic>)).toList();
+    assignments = assignmentsList;
     Map<DateTime, List<Assignment>> newAssignments = assignments.fold({}, (Map<DateTime, List<Assignment>> map, Assignment assignment) {
       DateTime dueDate = DateTime(assignment.dueDate!.year, assignment.dueDate!.month, assignment.dueDate!.day);
       // if the map already contains a list of assignments for the due date, add the new assignment to it
@@ -154,27 +159,23 @@ class _AssignmentListState extends State<AssignmentList> {
       return map;
     });
 
-    int? maxID = 0;
-    for (int i = 0; i < assignments.length; i++)
-    {
-      if (assignments[i].id! > maxID!)
-      {
-        maxID = assignments[i].id;
-      }
-    }
-    _lastInsertedID = maxID! + 1;
-    print(_lastInsertedID);
-
     setState(() {
       _events = newAssignments;
     });
     print(assignments);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // retrieve assignments from the database when the dependencies change
+    routeInfo = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    getAssignments();
+  }
+
+  @override
   void initState()
   {
-    getAssignments(); //get assignments
-
     super.initState();
   }
 

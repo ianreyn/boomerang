@@ -1,13 +1,11 @@
 import 'package:boomerang_app/assignment.dart';
-import 'package:boomerang_app/models/assignment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class SwipeBox extends StatefulWidget {
-  const SwipeBox({Key? key, this.assignment, this.model, this.getAllAssignments}) : super(key: key);
+  const SwipeBox({Key? key, this.assignment, this.getAllAssignments}) : super(key: key);
 
   final Assignment? assignment;
-  final AssignmentModel? model;
   final AssignmentCallback? getAllAssignments;
 
   @override
@@ -69,11 +67,11 @@ class _SwipeBoxState extends State<SwipeBox> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               IconButton(
-                                  onPressed: () => deleteItem(widget!.model!, widget.assignment!.id!),
+                                  onPressed: () => {},
                                   icon: const Icon(Icons.check_box_outlined)
                               ),
                               IconButton(
-                                  onPressed: () => updateItem(context, widget!.model!, widget.assignment!.id!),
+                                  onPressed: () => {},
                                   icon: const Icon(Icons.more_vert))
                             ],
                           ),
@@ -93,6 +91,7 @@ class _SwipeBoxState extends State<SwipeBox> {
     });
   }
 
+  /*
    deleteItem(AssignmentModel model, int id) async
    {
     bool delete = await showDialog(
@@ -123,6 +122,9 @@ class _SwipeBoxState extends State<SwipeBox> {
       }
   }
 
+   */
+
+  /*
   updateItem(BuildContext context, AssignmentModel model, int id) async
   {
     final newAssignment = await Navigator.pushNamed(context, '/addAssn');
@@ -135,6 +137,7 @@ class _SwipeBoxState extends State<SwipeBox> {
       widget.getAllAssignments!();
     });
   }
+  */
 }
 
 typedef AssignmentCallback = void Function();

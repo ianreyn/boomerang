@@ -73,26 +73,32 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.pink
             ),
           ),
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: "Username",
-              label: Text("Username"),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: "Username",
+                label: Text("Username"),
+              ),
+              onChanged: (value)
+              {
+                username = value;
+              },
             ),
-            onChanged: (value)
-            {
-              username = value;
-            },
           ),
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: "Password",
-              label: Text("Password"),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: "Password",
+                label: Text("Password"),
+              ),
+              obscureText: true,
+              onChanged: (value)
+              {
+                password = value;
+              },
             ),
-            obscureText: true,
-            onChanged: (value)
-            {
-              password = value;
-            },
           ),
           ElevatedButton(
               onPressed: () {
@@ -116,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
     if (query.size > 0)
       {
         var loginStatus = await Navigator.pushNamed(context, r'/calendar',
-            arguments: {'query': query});
+            arguments: {'query': query, 'username': username});
       }
 
   }

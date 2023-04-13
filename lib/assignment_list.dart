@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:boomerang_app/SwipeBox.dart';
 import 'package:boomerang_app/assignment.dart';
+import 'package:boomerang_app/message.dart';
 import 'package:boomerang_app/settingsclass.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,7 +41,7 @@ class _AssignmentListState extends State<AssignmentList> {
   {
     'PHY4910U': Color(0xFF498fde),
     'CSCI3310U': Color(0xFFcf539b),
-    'CSCI4201U': Color(0xFF8749de),
+    'CSCI4210U': Color(0xFF8749de),
     'Thesis': Color(0xFFed3e4c)
   };
   //refer back to https://pub.dev/documentation/table_calendar/latest/table_calendar/MarkerBuilder.html
@@ -88,19 +89,24 @@ class _AssignmentListState extends State<AssignmentList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(padding: EdgeInsets.all(4)),
         SizedBox(
           width: 100.0,
           height: 40.0,
-          child: ElevatedButton(
-              onPressed: addAssignment,
-              child: Row(
-                children: [
-                  Text("Add"),
-                  Icon(Icons.add),
-                ],
-              )
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+            child: ElevatedButton(
+                onPressed: addAssignment,
+                child: Row(
+                  children: [
+                    Text("Add"),
+                    Icon(Icons.add),
+                  ],
+                )
+            ),
           ),
         ),
+        Padding(padding: EdgeInsets.all(4)),
         TableCalendar<Assignment>(
           eventLoader: getEventsOfDay,
             focusedDay: _focusedDay,
@@ -145,17 +151,19 @@ class _AssignmentListState extends State<AssignmentList> {
                });
               }
             }),
-        Container(
-          height: 200,
-          child: ListView(
-            children:
-              assignmentsToday.map((assignment) => SwipeBox(
-                    assignment: assignment,
-                getAllAssignments: getAssignments, query: routeInfo['query'],
-                  )
-              ).toList(),
+        Expanded(
+          child: SingleChildScrollView(
+            //height: 200,
+            child: Column(
+              children:
+                assignmentsToday.map((assignment) => SwipeBox(
+                      assignment: assignment,
+                  getAllAssignments: getAssignments, query: routeInfo['query'], username: routeInfo['username'],
+                    )
+                ).toList(),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -209,6 +217,8 @@ class _AssignmentListState extends State<AssignmentList> {
 
   Future addAssignment() async
   {
+    //Get message connection
+    CollectionReference messageReference = FirebaseFirestore.instance.collection('messages');
     //Obtain settings
     QuerySnapshot query = routeInfo['query'];
     DocumentSnapshot studentDoc = query.docs[0];
@@ -217,6 +227,7 @@ class _AssignmentListState extends State<AssignmentList> {
     DocumentSnapshot settingsSnap = settingsSnapQuery.docs.first;
     Map<String, dynamic> settingsData = settingsSnap.data() as Map<String, dynamic>;
     SettingsObj settings = SettingsObj.fromMap(settingsData);
+    String username = routeInfo['username'];
 
     final newAssignment = await Navigator.pushNamed(context, '/addAssn',
         arguments: {'settings': settings, 'assignments': _events});
@@ -228,6 +239,12 @@ class _AssignmentListState extends State<AssignmentList> {
         print(assignment);
         Map<String, dynamic> assignmentData = assignment.toMap();
         await studentDoc.reference.collection('assignments').add(assignmentData);
+        if (settings.showPlanned!)//ONLY send a message to the teacher if the student has the setting on
+          {
+            Message messageOut = Message(classID: assignment.classId!, student: username, message: "Added assignment called ${assignment.title} due on ${assignment.dueDate}, scheduled to start at ${assignment.doTime}");
+            Map<String, dynamic> mapMessage = messageOut.toMap();
+            messageReference.add(mapMessage);
+          }
       }
     getAssignments();
 

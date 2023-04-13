@@ -1,14 +1,18 @@
 import 'package:boomerang_app/assignment.dart';
+import 'package:boomerang_app/settingsclass.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'message.dart';
+
 class SwipeBox extends StatefulWidget {
-  const SwipeBox({Key? key, this.assignment, this.getAllAssignments, this.query}) : super(key: key);
+  const SwipeBox({Key? key, this.assignment, this.getAllAssignments, this.query, this.username}) : super(key: key);
 
   final Assignment? assignment;
   final AssignmentCallback? getAllAssignments;
   final QuerySnapshot? query;
+  final String? username;
 
   @override
   State<SwipeBox> createState() => _SwipeBoxState();
@@ -58,8 +62,8 @@ class _SwipeBoxState extends State<SwipeBox> {
                   children: [
                     Expanded(
                         child: ListTile(
-                          title: Text(widget.assignment!.title!),
-                          subtitle: Text("Due on: ${DateFormat.yMMMEd().format(widget.assignment!.dueDate!)}"),
+                          title: Text("${widget.assignment!.title!} (${widget.assignment!.classId})"),
+                          subtitle: Text("${widget.assignment!.length!.toStringAsFixed(2)} hours, Due on: ${DateFormat.yMMMEd().format(widget.assignment!.dueDate!)}"),
                         )
                     ),
                     if (showButtons)
@@ -118,15 +122,30 @@ class _SwipeBoxState extends State<SwipeBox> {
     );
     if (delete)
       {
+        CollectionReference messageReference = FirebaseFirestore.instance.collection('messages');
+
         DocumentSnapshot studentDoc = widget.query!.docs[0];
         QuerySnapshot assignmentSnapshot = await studentDoc.reference.collection('assignments')
             .where('title', isEqualTo: widget.assignment!.title).where('classId', isEqualTo: widget.assignment!.classId).get();
         String assignmentToBeDeleted = assignmentSnapshot.docs[0].id;
         DocumentReference assignmentReference = studentDoc.reference.collection('assignments').doc(assignmentToBeDeleted);
+
+        CollectionReference settingsRef = studentDoc.reference.collection('settings');
+        QuerySnapshot settingsSnapQuery = await settingsRef.get();
+        DocumentSnapshot settingsSnap = settingsSnapQuery.docs.first;
+        Map<String, dynamic> settingsData = settingsSnap.data() as Map<String, dynamic>;
+        SettingsObj settings = SettingsObj.fromMap(settingsData);
+
         await assignmentReference.delete();
         setState(() {
           widget.getAllAssignments!();
         });
+
+        if (settings.showFinished!){ //only do if settings allow it
+          Message messageOut = Message(classID: widget.assignment!.classId, student: widget.username, message: "Completed assignment called ${widget.assignment!.title} due on ${widget.assignment!.dueDate}, at ${DateTime.now()}");
+          Map<String, dynamic> mapMessage = messageOut.toMap();
+          messageReference.add(mapMessage);
+        }
       }
   }
 

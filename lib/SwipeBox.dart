@@ -30,7 +30,7 @@ class _SwipeBoxState extends State<SwipeBox> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.pinkAccent,
+                  color: getColor(),
                   width: 3
                 ),
               ),
@@ -59,7 +59,7 @@ class _SwipeBoxState extends State<SwipeBox> {
                     Expanded(
                         child: ListTile(
                           title: Text(widget.assignment!.title!),
-                          subtitle: Text("Do at this time: ${DateFormat.yMMMEd().format(widget.assignment!.doTime!)}"),
+                          subtitle: Text("Due on: ${DateFormat.yMMMEd().format(widget.assignment!.dueDate!)}"),
                         )
                     ),
                     if (showButtons)
@@ -151,6 +151,23 @@ class _SwipeBoxState extends State<SwipeBox> {
       assignmentDoc.update(assignmentData);
       widget.getAllAssignments!();
     });
+  }
+
+  Color getColor()
+  {
+    switch (widget.assignment!.classId)
+    {
+      case 'CSCI3310U':
+        return Color(0xFFcf539b);
+      case 'PHY4910U':
+        return Color(0xFF498fde);
+      case 'CSCI4210U':
+        return Color(0xFF8749de);
+      case 'Thesis':
+        return Color(0xFFed3e4c);
+      default:
+        return Colors.grey;
+    }
   }
 }
 

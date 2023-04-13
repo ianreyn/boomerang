@@ -11,6 +11,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import 'event_marker.dart';
+
 class AssignmentList extends StatefulWidget {
   AssignmentList({Key? key, this.title}) : super(key: key);
 
@@ -33,6 +35,39 @@ class _AssignmentListState extends State<AssignmentList> {
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  //This map is extremely important for the mapping of the colours of the dots
+  static Map<String, Color> colourMap =
+  {
+    'PHY4910U': Color(0xFF498fde),
+    'CSCI3310U': Color(0xFFcf539b),
+    'CSCI4201U': Color(0xFF8749de),
+    'Thesis': Color(0xFFed3e4c)
+  };
+  //refer back to https://pub.dev/documentation/table_calendar/latest/table_calendar/MarkerBuilder.html
+  MarkerBuilder<Assignment> markerBuilder = (context, day, assignments) { //Assignments for the day, put em in a list
+    List<Widget> markers = [];
+
+    List classIDs = assignments.map((assignment) => assignment.classId).toList();
+
+    //Map the colours
+    for (String classID in classIDs) {
+      markers.add(
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: colourMap[classID] ?? Colors.grey, //if it's null just put grey I guess
+            shape: BoxShape.circle,
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: markers,
+    );
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +106,19 @@ class _AssignmentListState extends State<AssignmentList> {
             focusedDay: _focusedDay,
             firstDay: _firstDay,
             lastDay: _lastDay,
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: markerBuilder
+            ),
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.pinkAccent,
+                shape: BoxShape.circle
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Color(0xFFe3b6d4),
+                shape: BoxShape.circle
+              )
+            ),
             calendarFormat: _calendarFormat,
             selectedDayPredicate: (day) {
                 return isSameDay(day, _selectedDay);
@@ -111,6 +159,7 @@ class _AssignmentListState extends State<AssignmentList> {
       ],
     );
   }
+
   List<Assignment> getEventsOfDay(DateTime day)
   {
     DateTime adjustedDay = DateTime(day.year, day.month, day.day);
@@ -160,15 +209,26 @@ class _AssignmentListState extends State<AssignmentList> {
 
   Future addAssignment() async
   {
-    final newAssignment = await Navigator.pushNamed(context, '/addAssn');
-    String data = newAssignment.toString();
-    List subData = data.split(",");
-    Assignment assignment = Assignment(title: subData[0], dueDate: DateTime.parse(subData[1]), doTime: DateTime.parse(subData[2]), length: double.parse(subData[3]), classId: subData[4]);
-    print(assignment);
+    //Obtain settings
     QuerySnapshot query = routeInfo['query'];
     DocumentSnapshot studentDoc = query.docs[0];
-    Map<String, dynamic> assignmentData = assignment.toMap();
-    await studentDoc.reference.collection('assignments').add(assignmentData);
+    CollectionReference settingsRef = studentDoc.reference.collection('settings');
+    QuerySnapshot settingsSnapQuery = await settingsRef.get();
+    DocumentSnapshot settingsSnap = settingsSnapQuery.docs.first;
+    Map<String, dynamic> settingsData = settingsSnap.data() as Map<String, dynamic>;
+    SettingsObj settings = SettingsObj.fromMap(settingsData);
+
+    final newAssignment = await Navigator.pushNamed(context, '/addAssn',
+        arguments: {'settings': settings, 'assignments': _events});
+    String data = newAssignment.toString();
+    List subData = data.split(",");
+    for (int i = 0; i < subData.length-4; i+= 5)
+      {
+        Assignment assignment = Assignment(title: subData[i], dueDate: DateTime.parse(subData[i+1]), doTime: DateTime.parse(subData[i+2]), length: double.parse(subData[i+3]), classId: subData[i+4]);
+        print(assignment);
+        Map<String, dynamic> assignmentData = assignment.toMap();
+        await studentDoc.reference.collection('assignments').add(assignmentData);
+      }
     getAssignments();
 
   }
@@ -183,14 +243,14 @@ class _AssignmentListState extends State<AssignmentList> {
     List<Assignment> assignmentsList = assignmentsQuery.docs.map((doc) => Assignment.fromMap(doc.data() as Map<String, dynamic>)).toList();
     assignments = assignmentsList;
     Map<DateTime, List<Assignment>> newAssignments = assignments.fold({}, (Map<DateTime, List<Assignment>> map, Assignment assignment) {
-      DateTime dueDate = DateTime(assignment.dueDate!.year, assignment.dueDate!.month, assignment.dueDate!.day);
+      DateTime doTime = DateTime(assignment.doTime!.year, assignment.doTime!.month, assignment.doTime!.day);
       // if the map already contains a list of assignments for the due date, add the new assignment to it
-      if (map.containsKey(dueDate)) {
-        map[dueDate]?.add(assignment);
+      if (map.containsKey(doTime)) {
+        map[doTime]?.add(assignment);
       }
       // otherwise, create a new list with the assignment and add it to the map
       else {
-        map[dueDate] = [assignment];
+        map[doTime] = [assignment];
       }
 
       return map;

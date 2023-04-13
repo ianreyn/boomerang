@@ -1,5 +1,6 @@
 import 'package:boomerang_app/assignment_form.dart';
 import 'package:boomerang_app/assignment_list.dart';
+import 'package:boomerang_app/settings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,7 +32,8 @@ class MyApp extends StatelessWidget {
               home: LoginPage(),
               routes: {
                 '/calendar': (context) => AssignmentList(title: 'Calendar'),
-                '/addAssn': (context) => AssignmentForm(title: "Add an Assignment")
+                '/addAssn': (context) => AssignmentForm(title: "Add an Assignment"),
+                '/settings': (context) => SettingsPanel(title: 'Settings')
               },
             );
          }

@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:boomerang_app/SwipeBox.dart';
 import 'package:boomerang_app/assignment.dart';
+import 'package:boomerang_app/settingsclass.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +39,9 @@ class _AssignmentListState extends State<AssignmentList> {
 
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          IconButton(onPressed: sendToSettings, icon: Icon(Icons.settings))
+        ],
         title: Text(widget.title!),
       ),
       body: _makeCalendar(context),
@@ -121,6 +125,38 @@ class _AssignmentListState extends State<AssignmentList> {
 
   //List<Assignment>getEventsForDay(day)
 
+  Future sendToSettings() async
+  {
+    //print(routeInfo['query'].runtimeType);
+    final settings = await Navigator.pushNamed(context, '/settings',
+        arguments: {'query': routeInfo['query']});
+    String data = settings.toString();
+    List subData = data.split(",");
+    bool allowPlanned = false;
+    bool allowFinished = false;
+    if (subData[7] == "YesPlanned")
+      {
+        allowPlanned = true;
+      }
+    if (subData[8] == "YesFinished")
+      {
+        allowFinished = true;
+      }
+    SettingsObj newSettings = SettingsObj(double.parse(subData[0]), double.parse(subData[1]), double.parse(subData[2]), double.parse(subData[3]), double.parse(subData[4]), double.parse(subData[5]), double.parse(subData[6]), allowFinished, allowPlanned);
+    Map<String, dynamic> settingsData = newSettings.toMap();
+    print(newSettings);
+    QuerySnapshot query = routeInfo['query'];
+    DocumentSnapshot studentDoc = query.docs[0];
+    CollectionReference settingsRef = studentDoc.reference.collection('settings');
+    QuerySnapshot settingsSnapQuery = await settingsRef.get();
+    DocumentSnapshot settingsSnap = settingsSnapQuery.docs.first;
+    String id = settingsSnap.id;
+    DocumentReference settingsDoc = settingsRef.doc(id);
+
+    setState(() {
+      settingsDoc.update(settingsData);
+    });
+  }
 
   Future addAssignment() async
   {

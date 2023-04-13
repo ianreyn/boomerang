@@ -26,64 +26,66 @@ class _AssignmentFormState extends State<AssignmentForm> {
       appBar: AppBar(
         title: Text(widget.title!),
       ),
-      body: Form(
-        key: formKey,
-        child: Padding(
-          padding: EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: "Assignment Title"
+      body: SingleChildScrollView(
+        child: Form(
+          key: formKey,
+          child: Padding(
+            padding: EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: "Assignment Title"
+                  ),
                 ),
-              ),
-              TextField(
-                controller: dueController,
-                decoration: InputDecoration(
-                  labelText: "Due Date"
-                ),
-                focusNode: AlwaysDisabledFocusNode(),
-                onTap: () {
-                  selectDate(context, dueController);
-                },
-              ),
-              TextField(
-                controller: doController,
-                decoration: InputDecoration(
-                  labelText: "Do on this date"
-                ),
-                focusNode: AlwaysDisabledFocusNode(),
-                onTap: () {
-                  selectDate(context, doController);
-                },
-              ),
-              TextField(
-                controller: lengthController,
-                decoration: InputDecoration(
-                    labelText: "How many hours do you think you'll take?"
-                ),
-              ),
-              TextField(
-                controller: classController,
-                decoration: InputDecoration(
-                    labelText: "Enter the class code for this assignment"
-                ),
-              ),
-              TextField(
-                controller: numSessionsController,
-                decoration: InputDecoration(
-                    labelText: "Split the work on how many sessions?"
-                ),
-              ),
-              IconButton(
-                  onPressed: () {
-                    //Assignment newAssignment = Assignment(title: titleController.text, dueDate: DateTime.parse(dueController.text), doTime: DateTime.parse(doController.text), account: "default");
-                    Navigator.pop(context, "${titleController.text},${dueController.text},${doController.text},${lengthController.text},${classController.text}");
+                TextField(
+                  controller: dueController,
+                  decoration: InputDecoration(
+                    labelText: "Due Date"
+                  ),
+                  focusNode: AlwaysDisabledFocusNode(),
+                  onTap: () {
+                    selectDate(context, dueController);
                   },
-                  icon: Icon(Icons.save))
-            ],
+                ),
+                TextField(
+                  controller: doController,
+                  decoration: InputDecoration(
+                    labelText: "Do on this date"
+                  ),
+                  focusNode: AlwaysDisabledFocusNode(),
+                  onTap: () {
+                    selectDate(context, doController);
+                  },
+                ),
+                TextField(
+                  controller: lengthController,
+                  decoration: InputDecoration(
+                      labelText: "How many hours do you think you'll take?"
+                  ),
+                ),
+                TextField(
+                  controller: classController,
+                  decoration: InputDecoration(
+                      labelText: "Enter the class code for this assignment"
+                  ),
+                ),
+                TextField(
+                  controller: numSessionsController,
+                  decoration: InputDecoration(
+                      labelText: "Split the work on how many sessions?"
+                  ),
+                ),
+                IconButton(
+                    onPressed: () {
+                      //Assignment newAssignment = Assignment(title: titleController.text, dueDate: DateTime.parse(dueController.text), doTime: DateTime.parse(doController.text), account: "default");
+                      Navigator.pop(context, "${titleController.text},${dueController.text},${doController.text},${lengthController.text},${classController.text}");
+                    },
+                    icon: Icon(Icons.save))
+              ],
+            ),
           ),
         ),
       ),
